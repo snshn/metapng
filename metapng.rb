@@ -128,7 +128,6 @@ def main
 
 	puts 'What would you like to do?'
 	help()
-	#rm('Author')
 	cmd()
 
 end
