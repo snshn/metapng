@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 #
-# metapng.rb 1.0
+# metapng.rb 1.0.2
 # A command-line tool for editing metadata values of PNG images
 # Licensed under Public Domain
 #
@@ -22,11 +22,12 @@ end
 def help
 	puts ''
 	puts 'Usage:'
-	puts ' set <Key>           to create/modify a metadata record'
+	puts ' set <Key>           create/modify a metadata record'
 	if @image.metadata.length > 0
-		puts ' mv  <Key> <New_Key> to rename a record'
-		puts ' rm  <Key>           to remove a record'
+		puts ' mv  <Key> <New_Key> rename a record'
+		puts ' rm  <Key>           remove a record'
 	end
+	puts ' quit                exit the program'
 	puts ''
 end
 
@@ -49,7 +50,7 @@ def rm key
 		cmd()
 	end
 
-	puts 'Removing key "' << key << '"...'
+	puts 'Removing the metadata record "' << key << '"...'
 
 	@image.metadata.delete(key)
 end
@@ -57,6 +58,11 @@ end
 def mv key, new_key
 	if !@image.metadata.include? key
 		puts 'No such record to rename'
+	end
+	return puts 'Same source and destination names, nothing to do' if key == new_key
+	if new_key == nil
+		puts 'Please specify the destination'
+		cmd()
 	end
 
 	@image.metadata[new_key] = @image.metadata[key];
@@ -75,15 +81,17 @@ def cmd
 	return if string == ''
 	args = string.split(' ')
 
-	if !['set', 'mv', 'rm'].include? args[0]
-		puts 'Please enter the proper command name (set, mv, rm)'
-		cmd()
-	elsif args.length < 2
+	if !['set', 'mv', 'rm', 'quit'].include? args[0]
+		puts 'Please enter the proper command name (set, mv, rm, quit)'
+		return cmd()
+	elsif args[0] != 'quit' and args.length < 2
 		puts 'The command needs an argument' 
-		cmd()
+		return cmd()
 	end
 
-	if args[0] == 'mv'
+	if(args[0] == 'quit')
+		quit()
+	elsif args[0] == 'mv'
 		send('mv', args[1], args[2])
 	else
 		send(args[0], args[1])
@@ -114,7 +122,7 @@ def main
 			line(key.ljust(14), @image.metadata[key])
 		end
 	else
-		puts ' [No metadata has been found in this image]'
+		puts ' [No metadata records have been found in this image]'
 	end
 	puts ''
 
@@ -123,6 +131,13 @@ def main
 	#rm('Author')
 	cmd()
 
+end
+
+def quit
+	puts ''
+	puts 'Have a nice day!'
+	puts ''
+	exit
 end
 
 main()
